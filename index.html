@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>경기오산 SW고 블로그</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header id="site-header">
+  <div class="header-inner">
+    <a href="#" class="logo" onclick="showPage('home')">
+      <span class="logo-accent">SW</span>HS<span class="logo-dot">.</span>BLOG
+    </a>
+    <nav id="main-nav">
+      <button class="nav-btn" onclick="showPage('home')">홈</button>
+      <button class="nav-btn" onclick="showPage('explore')">탐색</button>
+      <span id="nav-auth-area"></span>
+    </nav>
+  </div>
+</header>
+
+<!-- ── PAGES ── -->
+<main id="app">
+
+  <!-- HOME PAGE -->
+  <div id="page-home" class="page active">
+    <section class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-content">
+        <p class="hero-sub">경기오산 소프트웨어고등학교</p>
+        <h1 class="hero-title">학생 블로그</h1>
+        <p class="hero-desc">우리의 생각, 프로젝트, 일상을 공유하는 공간</p>
+        <div class="hero-actions">
+          <button class="btn-primary" onclick="requireAuth('write')">글 쓰기</button>
+          <button class="btn-ghost" onclick="showPage('explore')">블로그 탐색</button>
+        </div>
+      </div>
+    </section>
+    <section class="section">
+      <h2 class="section-title">최신 글</h2>
+      <div id="home-posts" class="post-grid"></div>
+    </section>
+  </div>
+
+  <!-- EXPLORE PAGE -->
+  <div id="page-explore" class="page">
+    <div class="page-header">
+      <h2>블로그 탐색</h2>
+      <div class="search-bar">
+        <input type="text" id="search-input" placeholder="검색어를 입력하세요..." oninput="filterPosts()" />
+      </div>
+    </div>
+    <div class="tag-filters" id="tag-filters"></div>
+    <div id="explore-posts" class="post-grid"></div>
+  </div>
+
+  <!-- WRITE PAGE -->
+  <div id="page-write" class="page">
+    <div class="write-container">
+      <h2>새 글 작성</h2>
+      <div class="write-form">
+        <input type="text" id="post-title" class="write-input" placeholder="제목을 입력하세요" maxlength="100" />
+        <div class="tag-input-area">
+          <input type="text" id="tag-input" class="write-input-sm" placeholder="태그 입력 후 Enter" />
+          <div id="tags-preview" class="tags-preview"></div>
+        </div>
+        <textarea id="post-content" class="write-textarea" placeholder="내용을 입력하세요..."></textarea>
+        <div class="write-actions">
+          <button class="btn-ghost" onclick="showPage('home')">취소</button>
+          <button class="btn-primary" onclick="submitPost()">발행하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST DETAIL PAGE -->
+  <div id="page-post" class="page">
+    <div class="post-detail-container">
+      <button class="back-btn" onclick="goBack()">← 뒤로</button>
+      <div id="post-detail-content"></div>
+      <section class="comments-section">
+        <h3>댓글 <span id="comment-count">0</span>개</h3>
+        <div id="comments-list"></div>
+        <div id="comment-form-area"></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- AUTH PAGE -->
+  <div id="page-auth" class="page">
+    <div class="auth-container">
+      <div class="auth-box">
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">로그인</button>
+          <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">회원가입</button>
+        </div>
+
+        <!-- LOGIN -->
+        <div id="auth-login" class="auth-panel active">
+          <p class="auth-desc">휴대폰 번호로 로그인하세요</p>
+          <input type="tel" id="login-phone" class="auth-input" placeholder="010-XXXX-XXXX" />
+          <button class="btn-primary full-width" onclick="sendLoginCode()">인증번호 받기</button>
+          <div id="login-code-area" style="display:none">
+            <input type="text" id="login-code" class="auth-input" placeholder="인증번호 6자리" maxlength="6" />
+            <button class="btn-primary full-width" onclick="verifyLoginCode()">로그인</button>
+          </div>
+          <div class="admin-key-area">
+            <input type="password" id="admin-key-input" class="auth-input" placeholder="관리자 키 (선택)" />
+            <p class="auth-hint">관리자는 관리자 키를 입력하세요</p>
+          </div>
+        </div>
+
+        <!-- SIGNUP -->
+        <div id="auth-signup" class="auth-panel">
+          <p class="auth-desc">학생/교직원 계정을 만드세요</p>
+          <select id="signup-role" class="auth-input">
+            <option value="student">학생</option>
+            <option value="teacher">교직원</option>
+          </select>
+          <input type="text" id="signup-name" class="auth-input" placeholder="이름" />
+          <input type="text" id="signup-grade" class="auth-input" placeholder="학년-반 (예: 1-2, 교직원은 담당과목)" />
+          <input type="tel" id="signup-phone" class="auth-input" placeholder="010-XXXX-XXXX" />
+          <button class="btn-primary full-width" onclick="sendSignupCode()">인증번호 받기</button>
+          <div id="signup-code-area" style="display:none">
+            <input type="text" id="signup-code" class="auth-input" placeholder="인증번호 6자리" maxlength="6" />
+            <button class="btn-primary full-width" onclick="verifySignupCode()">가입하기</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN PAGE -->
+  <div id="page-admin" class="page">
+    <div class="admin-container">
+      <div class="admin-header">
+        <h2>🛡 관리자 패널</h2>
+        <span class="admin-badge">ADMIN</span>
+      </div>
+      <div class="admin-tabs">
+        <button class="admin-tab-btn active" onclick="showAdminTab('posts')">게시글 관리</button>
+        <button class="admin-tab-btn" onclick="showAdminTab('users')">회원 관리</button>
+        <button class="admin-tab-btn" onclick="showAdminTab('reports')">신고 내역</button>
+      </div>
+      <div id="admin-posts-tab" class="admin-tab-content active">
+        <div id="admin-posts-list"></div>
+      </div>
+      <div id="admin-users-tab" class="admin-tab-content">
+        <div id="admin-users-list"></div>
+      </div>
+      <div id="admin-reports-tab" class="admin-tab-content">
+        <div id="admin-reports-list"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<!-- MODAL -->
+<div id="modal-overlay" class="modal-overlay" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
